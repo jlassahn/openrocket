@@ -17,7 +17,8 @@ public class PanelSolver
 	public void addPanel(int groupId, Vector3D p0, Vector3D p1, Vector3D p2) { }
 	public void addWake(int groupId, Vector3D p1, Vector3D p2, Vector3D direction, float strength) {}
 	public void deleteGroup(int groupId) {}
-
+	public void deleteAll() {}
+	
 	public void startSolver(SolverSettings settings) {}
 	public boolean isSolverDone() { return false; }
 	public float solverProgress() { return 0.0f; }

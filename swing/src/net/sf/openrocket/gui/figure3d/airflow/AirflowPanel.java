@@ -33,7 +33,7 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 	private float ratio = 1.0f;
 	private int[] textureIds = new int[1];
 	
-	public AirflowPanel() {
+	public AirflowPanel(AirflowController controller) {
 		log.info("AirflowPanel constructor");
 		this.setLayout(new BorderLayout());
 		
@@ -72,6 +72,7 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		//glu.gluPerspective(p.getFov() * (180.0 / Math.PI), ratio, 0.1f, 50f);
 		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 		gl.glLoadIdentity();
+		// can use gl.glLoadMatrix(matrix); //float[16] matrix
 
 		//gl.glEnable(GL.GL_CULL_FACE);
 		//gl.glCullFace(GL.GL_BACK);
@@ -115,6 +116,8 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		gl.glVertex3f(1, 0, -20);
 		gl.glEnd();
 		
+		
+		gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glBegin(GL.GL_LINE_LOOP);
 		gl.glColor3f(1,0,0);
 		gl.glVertex3f(0, 0, -15);
