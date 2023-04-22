@@ -24,17 +24,20 @@ import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 
-public class AirflowPanel extends JPanel implements GLEventListener, MouseInputListener, MouseWheelListener {
+public class AirflowPanel extends JPanel implements GLEventListener, MouseInputListener, MouseWheelListener, AirflowController.ControllerEventHandler {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(AirflowPanel.class);
 
+	private AirflowController controller;
+	
 	private GLCanvas canvas;
 	private float ratio = 1.0f;
 	private int[] textureIds = new int[1];
 	
-	public AirflowPanel(AirflowController controller) {
+	public AirflowPanel(AirflowController controllerIn) {
 		log.info("AirflowPanel constructor");
+		controller = controllerIn;
 		this.setLayout(new BorderLayout());
 		
 		log.debug("Setting up GL capabilities...");
@@ -48,7 +51,7 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		canvas.addMouseWheelListener(this);
 		canvas.addMouseMotionListener(this);
 		canvas.addMouseListener(this);
-
+		controller.addRedrawListener(this);
 	}
 
 	@Override
@@ -58,81 +61,33 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		
 		GL2 gl = drawable.getGL().getGL2();
 		GLU glu = new GLU();
-		gl.glClearColor(1,1,0, 1);
+		gl.glClearColor(0,0,0, 1);
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 		gl.glDisable(GLLightingFunc.GL_LIGHTING);
 
 		gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		gl.glLoadIdentity();
-		//gl.glLoadMatrixf();
 		glu.gluPerspective(
 				10.0, //vertical FoV degrees
 				ratio,
-				0.1, 50); //front and back clips
-		//glu.gluPerspective(p.getFov() * (180.0 / Math.PI), ratio, 0.1f, 50f);
+				10, 10000); //front and back clips
+
 		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-		gl.glLoadIdentity();
-		// can use gl.glLoadMatrix(matrix); //float[16] matrix
+		gl.glLoadMatrixd(controller.settings.viewMatrix, 0);
 
 		//gl.glEnable(GL.GL_CULL_FACE);
 		//gl.glCullFace(GL.GL_BACK);
-		gl.glFrontFace(GL.GL_CCW);
-		gl.glDepthMask(false);
-		//gl.glFrontFace(GL.GL_CW);
+		//gl.glFrontFace(GL.GL_CCW);
+		gl.glDepthMask(true);
+		gl.glDepthFunc(GL.GL_LESS);
+		gl.glEnable(GL.GL_DEPTH_TEST);
+		
+		drawTriangles(gl);
+		drawLines(gl);
+		drawCutPlane(gl);
 
-		
-		
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		gl.glBindTexture(GL.GL_TEXTURE_2D, textureIds[0]);
-		
-		byte[] picture = new byte[16*16*4];
-		for (int x=0; x<16; x++)
-			for (int y=0; y<16; y++)
-			{
-				picture[0 + 4*x + 4*16*y] = (byte)((y&1)*255);  // Red
-				picture[1 + 4*x + 4*16*y] = (byte)0;  // Green
-				picture[2 + 4*x + 4*16*y] = (byte)((x&1)*255);  // Blue
-				picture[3 + 4*x + 4*16*y] = (byte)0;
-			}
-		ByteBuffer buf = ByteBuffer.wrap(picture);
-		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, 16, 16, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, buf);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-		
-		gl.glBegin(GL.GL_TRIANGLES);
-		// +X is up
-		// +Y is right
-		// -Z is forward
-		gl.glColor3f(1,1,1);  // Color should be white for textures to work
-		gl.glTexCoord2f(0, 0);
-		gl.glVertex3f(0, 0, -20);
-		
-		gl.glColor3f(1,1,1);
-		gl.glTexCoord2f(1, 1);
-		gl.glVertex3f(1, 1, -20);
-		
-		gl.glColor3f(1,1,1);
-		gl.glTexCoord2f(1, 0);
-		gl.glVertex3f(1, 0, -20);
-		gl.glEnd();
-		
-		
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		gl.glBegin(GL.GL_LINE_LOOP);
-		gl.glColor3f(1,0,0);
-		gl.glVertex3f(0, 0, -15);
-		gl.glColor3f(0,1,0);
-		gl.glVertex3f(1, 1, -15);
-		gl.glColor3f(0,0,1);
-		gl.glVertex3f(1, 0, -15);
-		gl.glEnd();
-		
-		
-		
-				
 		int error = gl.glGetError();
 		log.info("error = "+error);
-		
 	}
 
 	@Override
@@ -206,5 +161,186 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		// TODO Auto-generated method stub
 		log.info("mouse wheel");
+	}
+
+	@Override
+	public void onControllerChange() {
+		canvas.repaint();
+	}
+	
+	private void drawTriangles(GL2 gl) {
+		
+	}
+	
+	private void drawLines(GL2 gl) {
+		gl.glBegin(GL.GL_LINES);
+
+		gl.glColor3f(1, 1, 1);
+		gl.glVertex3f(0, 0, 0);
+		gl.glVertex3f(1, 0, 0);
+		gl.glVertex3f(0, 1, 0);
+		gl.glVertex3f(1, 1, 0);
+		gl.glVertex3f(0, 0, 1);
+		gl.glVertex3f(1, 0, 1);
+		gl.glVertex3f(0, 1, 1);
+		gl.glVertex3f(1, 1, 1);
+		
+		gl.glVertex3f(0, 0, 0);
+		gl.glVertex3f(0, 1, 0);
+		gl.glVertex3f(1, 0, 0);
+		gl.glVertex3f(1, 1, 0);
+		gl.glVertex3f(0, 0, 1);
+		gl.glVertex3f(0, 1, 1);
+		gl.glVertex3f(1, 0, 1);
+		gl.glVertex3f(1, 1, 1);
+		
+		gl.glVertex3f(0, 0, 0);
+		gl.glVertex3f(0, 0, 1);
+		gl.glVertex3f(1, 0, 0);
+		gl.glVertex3f(1, 0, 1);
+		gl.glVertex3f(0, 1, 0);
+		gl.glVertex3f(0, 1, 1);
+		gl.glVertex3f(1, 1, 0);
+		gl.glVertex3f(1, 1, 1);
+
+		gl.glColor3f(1, 0, 0);
+		gl.glVertex3f(10, 0, 0);
+		gl.glVertex3f(11, 0, 0);
+		gl.glVertex3f(10, 1, 0);
+		gl.glVertex3f(11, 1, 0);
+		gl.glVertex3f(10, 0, 1);
+		gl.glVertex3f(11, 0, 1);
+		gl.glVertex3f(10, 1, 1);
+		gl.glVertex3f(11, 1, 1);
+		
+		gl.glVertex3f(10, 0, 0);
+		gl.glVertex3f(10, 1, 0);
+		gl.glVertex3f(11, 0, 0);
+		gl.glVertex3f(11, 1, 0);
+		gl.glVertex3f(10, 0, 1);
+		gl.glVertex3f(10, 1, 1);
+		gl.glVertex3f(11, 0, 1);
+		gl.glVertex3f(11, 1, 1);	
+		
+		gl.glVertex3f(10, 0, 0);
+		gl.glVertex3f(10, 0, 1);
+		gl.glVertex3f(11, 0, 0);
+		gl.glVertex3f(11, 0, 1);
+		gl.glVertex3f(10, 1, 0);
+		gl.glVertex3f(10, 1, 1);
+		gl.glVertex3f(11, 1, 0);
+		gl.glVertex3f(11, 1, 1);
+
+		gl.glColor3f(0, 1, 0);
+		gl.glVertex3f(0, 10, 0);
+		gl.glVertex3f(1, 10, 0);
+		gl.glVertex3f(0, 11, 0);
+		gl.glVertex3f(1, 11, 0);
+		gl.glVertex3f(0, 10, 1);
+		gl.glVertex3f(1, 10, 1);
+		gl.glVertex3f(0, 11, 1);
+		gl.glVertex3f(1, 11, 1);
+		
+		gl.glVertex3f(0, 10, 0);
+		gl.glVertex3f(0, 11, 0);
+		gl.glVertex3f(1, 10, 0);
+		gl.glVertex3f(1, 11, 0);
+		gl.glVertex3f(0, 10, 1);
+		gl.glVertex3f(0, 11, 1);
+		gl.glVertex3f(1, 10, 1);
+		gl.glVertex3f(1, 11, 1);	
+		
+		gl.glVertex3f(0, 10, 0);
+		gl.glVertex3f(0, 10, 1);
+		gl.glVertex3f(1, 10, 0);
+		gl.glVertex3f(1, 10, 1);
+		gl.glVertex3f(0, 11, 0);
+		gl.glVertex3f(0, 11, 1);
+		gl.glVertex3f(1, 11, 0);
+		gl.glVertex3f(1, 11, 1);
+
+		gl.glColor3f(0, 0, 1);
+		gl.glVertex3f(0, 0, 10);
+		gl.glVertex3f(1, 0, 10);
+		gl.glVertex3f(0, 1, 10);
+		gl.glVertex3f(1, 1, 10);
+		gl.glVertex3f(0, 0, 11);
+		gl.glVertex3f(1, 0, 11);
+		gl.glVertex3f(0, 1, 11);
+		gl.glVertex3f(1, 1, 11);
+		
+		gl.glVertex3f(0, 0, 10);
+		gl.glVertex3f(0, 1, 10);
+		gl.glVertex3f(1, 0, 10);
+		gl.glVertex3f(1, 1, 10);
+		gl.glVertex3f(0, 0, 11);
+		gl.glVertex3f(0, 1, 11);
+		gl.glVertex3f(1, 0, 11);
+		gl.glVertex3f(1, 1, 11);
+		
+		gl.glVertex3f(0, 0, 10);
+		gl.glVertex3f(0, 0, 11);
+		gl.glVertex3f(1, 0, 10);
+		gl.glVertex3f(1, 0, 11);
+		gl.glVertex3f(0, 1, 10);
+		gl.glVertex3f(0, 1, 11);
+		gl.glVertex3f(1, 1, 10);
+		gl.glVertex3f(1, 1, 11);
+
+		gl.glEnd();
+	}
+	
+	private void drawCutPlane(GL2 gl) {
+		gl.glFrontFace(GL.GL_CW);		
+		gl.glEnable(GL.GL_TEXTURE_2D);
+		gl.glBindTexture(GL.GL_TEXTURE_2D, textureIds[0]);
+		
+		ByteBuffer buf = getCutPlaneBytes();
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, 16, 16, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, buf);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+		
+		gl.glBegin(GL.GL_TRIANGLES);
+		gl.glColor3f(1,1,1);  // Color should be white for textures to work
+		
+		// +X is right
+		// +Y is up
+		// -Z is forward
+		gl.glTexCoord2f(0, 0);
+		gl.glVertex3f(5, 0, 0);
+		
+		gl.glTexCoord2f(1, 1);
+		gl.glVertex3f(5, 10, 10);
+		
+		gl.glTexCoord2f(1, 0);
+		gl.glVertex3f(5, 10, 0);
+		
+		gl.glTexCoord2f(0, 0);
+		gl.glVertex3f(5, 0, 0);
+		
+		gl.glTexCoord2f(0, 1);
+		gl.glVertex3f(5, 0, 10);
+		
+		gl.glTexCoord2f(1, 1);
+		gl.glVertex3f(5, 10, 10);
+		
+		gl.glEnd();
+		
+		gl.glDisable(GL.GL_TEXTURE_2D);
+	}
+	
+	private ByteBuffer getCutPlaneBytes() {
+
+		byte[] picture = new byte[16*16*4];
+		for (int x=0; x<16; x++)
+			for (int y=0; y<16; y++)
+			{
+				picture[0 + 4*x + 4*16*y] = (byte)((y&1)*255);  // Red
+				picture[1 + 4*x + 4*16*y] = (byte)0;  // Green
+				picture[2 + 4*x + 4*16*y] = (byte)((x&1)*255);  // Blue
+				picture[3 + 4*x + 4*16*y] = (byte)0;
+			}
+		ByteBuffer buf = ByteBuffer.wrap(picture);
+		return buf;
 	}
 }

@@ -379,7 +379,8 @@ public class PhotoFrame extends JFrame {
 		Databases.fakeMethod();
 
 		GeneralRocketLoader grl = new GeneralRocketLoader(new File(
-				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
+				"/Users/jkl/projects/rockets/Shuttle/PrintedBT60/flight_model.ork"));
+				//"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
 		OpenRocketDocument doc = grl.load();
 
 		PhotoFrame pa = new PhotoFrame(true, doc);
