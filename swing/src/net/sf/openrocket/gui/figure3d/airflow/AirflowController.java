@@ -53,9 +53,42 @@ public class AirflowController {
 		solverListeners.remove(target);
 	}
 	
+	public void notifyRedraw() {
+		for (ControllerEventHandler target : redrawListeners)
+			target.onControllerChange();
+	}
+	
+	public void notifyRefetch() {
+		for (ControllerEventHandler target : refetchListeners)
+			target.onControllerChange();
+		for (ControllerEventHandler target : redrawListeners)
+			target.onControllerChange();
+	}
+	
+	public void notifySolverChange() {
+		for (ControllerEventHandler target : solverListeners)
+			target.onControllerChange();
+		for (ControllerEventHandler target : refetchListeners)
+			target.onControllerChange();
+		for (ControllerEventHandler target : redrawListeners)
+			target.onControllerChange();
+	}
 	
 	public void moveViewMatrix(double[] delta, double speed) {
+		
 		log.info("MOVE! "+delta);
+
+		ViewMatrix matrix = new ViewMatrix();
+		for (int i=0; i<16; i++)
+			matrix.matrix[i] += delta[i]*speed;
+		matrix.normalize();
+		
+		ViewMatrix result = new ViewMatrix();
+		ViewMatrix.mult(matrix, settings.viewMatrix, result);
+		result.normalize();
+		settings.viewMatrix = result;
+		
+		notifyRedraw();
 	}
 
 }

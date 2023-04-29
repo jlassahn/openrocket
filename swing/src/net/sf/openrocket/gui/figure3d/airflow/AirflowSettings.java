@@ -7,10 +7,10 @@ public class AirflowSettings {
 	// * * * 0
 	// x y z 1
 	
-	public double[] viewMatrix = {
+	public ViewMatrix viewMatrix = new ViewMatrix(new double[] {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		0, 0,-300, 1
-	};
+		0, 0,-100, 1
+	});
 }

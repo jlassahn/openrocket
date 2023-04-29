@@ -27,76 +27,76 @@ public class AirflowSettingsPane extends JTabbedPane {
 	private static final Logger log = LoggerFactory.getLogger(AirflowPanel.class);
 
 	final static double[] ROTATE_LEFT = {
-			 0,  0, -1,  0,
+			 0,  0,  1,  0,
 			 0,  0,  0,  0,
-			 1,  0,  0,  0,
+			-1,  0,  0,  0,
 			 0,  0,  0,  0
 	};
 	final static double[] ROTATE_RIGHT = {
-			 0,  0,  1,  0,
+			 0,  0, -1,  0,
 			 0,  0,  0,  0,
-			-1,  0,  0,  0,
+			 1,  0,  0,  0,
 			 0,  0,  0,  0
 	};
 	final static double[] ROTATE_UP = {
+			 0,  0,  0,  0,
+			 0,  0, -1,  0,
+			 0, 01,  0,  0,
+			 0,  0,  0,  0
+	};
+	final static double[] ROTATE_DOWN = {
+			 0,  0,  0,  0,
+			 0,  0,  1,  0,
+			 0, -1,  0,  0,
+			 0,  0,  0,  0
+	};
+	final static double[] ROTATE_CW = {
 			 0,  1,  0,  0,
 			-1,  0,  0,  0,
 			 0,  0,  0,  0,
 			 0,  0,  0,  0
 	};
-	final static double[] ROTATE_DOWN = {
+	final static double[] ROTATE_CCW = {
 			 0, -1,  0,  0,
 			 1,  0,  0,  0,
 			 0,  0,  0,  0,
 			 0,  0,  0,  0
 	};
-	final static double[] ROTATE_CW = {
-			 0,  0,  0,  0,
-			 0,  0,  1,  0,
-			 0, -1,  0,  0,
-			 0,  0,  0,  0
-	};
-	final static double[] ROTATE_CCW = {
-			 0,  0,  0,  0,
-			 0,  0, -1,  0,
-			 0,  1,  0,  0,
-			 0,  0,  0,  0
-	};
 	final static double[] MOVE_LEFT = {
-			 0,  0,  0, -1,
 			 0,  0,  0,  0,
 			 0,  0,  0,  0,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			 1,  0,  0,  0
 	};
 	final static double[] MOVE_RIGHT = {
-			 0,  0,  0,  1,
 			 0,  0,  0,  0,
 			 0,  0,  0,  0,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			-1,  0,  0,  0
 	};
 	final static double[] MOVE_UP = {
 			 0,  0,  0,  0,
-			 0,  0,  0,  1,
 			 0,  0,  0,  0,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			 0, -1,  0,  0
 	};
 	final static double[] MOVE_DOWN = {
 			 0,  0,  0,  0,
-			 0,  0,  0, -1,
 			 0,  0,  0,  0,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			 0,  1,  0,  0
 	};
 	final static double[] MOVE_FORWARD = {
 			 0,  0,  0,  0,
 			 0,  0,  0,  0,
-			 0,  0,  0,  1,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			 0,  0,  1,  0
 	};
 	final static double[] MOVE_BACK = {
 			 0,  0,  0,  0,
 			 0,  0,  0,  0,
-			 0,  0,  0, -1,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			 0,  0, -1,  0
 	};
 	
 	private AirflowController controller;
@@ -107,7 +107,7 @@ public class AirflowSettingsPane extends JTabbedPane {
 		Vector<ViewMoveButton> listeners;
 		
 		public ButtonTimer() {
-			super(1000, null);
+			super(100, null);
 			listeners = new Vector<ViewMoveButton>();
 			addActionListener(this);
 		}
@@ -135,14 +135,15 @@ public class AirflowSettingsPane extends JTabbedPane {
 		private boolean isPressed;
 		private String name;
 		private double[] moveDelta;
-		private final double moveSpeed = 1.0;
+		private double moveSpeed;
 		
 		// captures stage changed events to allow updates on a time while
 		// the button is held down
-		public ViewMoveButton(String text, String iconName, double[] delta) {
+		public ViewMoveButton(String text, String iconName, double speed, double[] delta) {
 			super();
 
 			name = text;
+			moveSpeed = speed;
 			moveDelta = delta;
 			isPressed = false;
 
@@ -200,41 +201,41 @@ public class AirflowSettingsPane extends JTabbedPane {
 		c.gridheight = 1;
 		c.gridx = 0;
 		c.gridy = 2;
-		panel.add(new ViewMoveButton("Rotate Left", "pix/arrows/rotate_left.png", ROTATE_LEFT), c);
+		panel.add(new ViewMoveButton("Rotate Left", "pix/arrows/rotate_left.png", 0.01, ROTATE_LEFT), c);
 		c.gridx = 2;
 		c.gridy = 2;
-		panel.add(new ViewMoveButton("Rotate Right", "pix/arrows/rotate_right.png", ROTATE_RIGHT), c);
+		panel.add(new ViewMoveButton("Rotate Right", "pix/arrows/rotate_right.png", 0.01, ROTATE_RIGHT), c);
 		c.gridx = 1;
 		c.gridy = 1;
-		panel.add(new ViewMoveButton("Rotate Up", "pix/arrows/rotate_up.png", ROTATE_UP), c);
+		panel.add(new ViewMoveButton("Rotate Up", "pix/arrows/rotate_up.png", 0.01, ROTATE_UP), c);
 		c.gridx = 1;
 		c.gridy = 3;
-		panel.add(new ViewMoveButton("Rotate Down", "pix/arrows/rotate_down.png", ROTATE_DOWN), c);
+		panel.add(new ViewMoveButton("Rotate Down", "pix/arrows/rotate_down.png", 0.01, ROTATE_DOWN), c);
 		c.gridx = 2;
 		c.gridy = 1;
-		panel.add(new ViewMoveButton("Rotate CW", "pix/arrows/rotate_cw.png", ROTATE_CW), c);
+		panel.add(new ViewMoveButton("Rotate CW", "pix/arrows/rotate_cw.png", 0.01, ROTATE_CW), c);
 		c.gridx = 0;
 		c.gridy = 1;
-		panel.add(new ViewMoveButton("Rotate CCW", "pix/arrows/rotate_ccw.png", ROTATE_CCW), c);
+		panel.add(new ViewMoveButton("Rotate CCW", "pix/arrows/rotate_ccw.png", 0.01, ROTATE_CCW), c);
 		
 		c.gridx = 6;
 		c.gridy = 2;
-		panel.add(new ViewMoveButton("Move Left", "pix/arrows/move_left.png", MOVE_LEFT), c);
+		panel.add(new ViewMoveButton("Move Left", "pix/arrows/move_left.png", 1.0, MOVE_LEFT), c);
 		c.gridx = 8;
 		c.gridy = 2;
-		panel.add(new ViewMoveButton("Move Right", "pix/arrows/move_right.png", MOVE_RIGHT), c);
+		panel.add(new ViewMoveButton("Move Right", "pix/arrows/move_right.png", 1.0, MOVE_RIGHT), c);
 		c.gridx = 7;
 		c.gridy = 1;
-		panel.add(new ViewMoveButton("Move Up", "pix/arrows/move_up.png", MOVE_UP), c);
+		panel.add(new ViewMoveButton("Move Up", "pix/arrows/move_up.png", 1.0, MOVE_UP), c);
 		c.gridx = 7;
 		c.gridy = 3;
-		panel.add(new ViewMoveButton("Move Down", "pix/arrows/move_down.png", MOVE_DOWN), c);
+		panel.add(new ViewMoveButton("Move Down", "pix/arrows/move_down.png", 1.0, MOVE_DOWN), c);
 		c.gridx = 8;
 		c.gridy = 1;
-		panel.add(new ViewMoveButton("Move Forward", "pix/arrows/move_forward.png", MOVE_FORWARD), c);
+		panel.add(new ViewMoveButton("Move Forward", "pix/arrows/move_forward.png", 1.0, MOVE_FORWARD), c);
 		c.gridx = 8;
 		c.gridy = 3;
-		panel.add(new ViewMoveButton("Move Back", "pix/arrows/move_back.png", MOVE_BACK), c);
+		panel.add(new ViewMoveButton("Move Back", "pix/arrows/move_back.png", 1.0, MOVE_BACK), c);
 		
 		c.gridwidth = 3;
 		c.gridx = 0;

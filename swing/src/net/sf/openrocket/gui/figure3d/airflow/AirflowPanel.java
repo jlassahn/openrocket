@@ -68,12 +68,12 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		gl.glLoadIdentity();
 		glu.gluPerspective(
-				10.0, //vertical FoV degrees
+				30.0, //vertical FoV degrees
 				ratio,
 				10, 10000); //front and back clips
 
 		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-		gl.glLoadMatrixd(controller.settings.viewMatrix, 0);
+		gl.glLoadMatrixd(controller.settings.viewMatrix.matrix, 0);
 
 		//gl.glEnable(GL.GL_CULL_FACE);
 		//gl.glCullFace(GL.GL_BACK);
