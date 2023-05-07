@@ -90,5 +90,12 @@ public class AirflowController {
 		
 		notifyRedraw();
 	}
+	
+	public void resetViewMatrix(double[] matrix) {
+		log.info("RESET!");
+		settings.viewMatrix.matrix = matrix.clone();
+		settings.viewMatrix.matrix[14] = -settings.defaultDistance;
+		notifyRedraw();
+	}
 
 }

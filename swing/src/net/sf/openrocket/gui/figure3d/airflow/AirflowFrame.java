@@ -33,8 +33,6 @@ public class AirflowFrame extends JFrame {
 
 		settingsDialog = new JDialog(this, "Viewer Controls");
 		settingsDialog.setContentPane(new AirflowSettingsPane(controller));
-
-		settingsDialog.setPreferredSize(new Dimension(600, 500));
 		settingsDialog.pack();
 		settingsDialog.setVisible(true);
 	}

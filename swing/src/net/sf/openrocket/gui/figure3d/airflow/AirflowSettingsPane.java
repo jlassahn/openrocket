@@ -41,7 +41,7 @@ public class AirflowSettingsPane extends JTabbedPane {
 	final static double[] ROTATE_UP = {
 			 0,  0,  0,  0,
 			 0,  0, -1,  0,
-			 0, 01,  0,  0,
+			 0,  1,  0,  0,
 			 0,  0,  0,  0
 	};
 	final static double[] ROTATE_DOWN = {
@@ -98,7 +98,43 @@ public class AirflowSettingsPane extends JTabbedPane {
 			 0,  0,  0,  0,
 			 0,  0, -1,  0
 	};
-	
+	final static double[] RESET_XP = {
+			 0,  0,  1,  0,
+			 0,  1,  0,  0,
+			-1,  0,  0,  0,
+			 0,  0,  0,  1
+	};
+	final static double[] RESET_XN = {
+			 0,  0, -1,  0,
+			 0,  1,  0,  0,
+			 1,  0,  0,  0,
+			 0,  0,  0,  1
+	};
+	final static double[] RESET_YP = {
+			 1,  0,  0,  0,
+			 0,  0,  1,  0,
+			 0, -1,  0,  0,
+			 0,  0,  0,  1
+	};
+	final static double[] RESET_YN = {
+			 1,  0,  0,  0,
+			 0,  0, -1,  0,
+			 0,  1,  0,  0,
+			 0,  0,  0,  1
+	};
+	final static double[] RESET_ZP = {
+			 1,  0,  0,  0,
+			 0,  1,  0,  0,
+			 0,  0,  1,  0,
+			 0,  0,  0,  1
+	};
+	final static double[] RESET_ZN = {
+			-1,  0,  0,  0,
+			 0,  1,  0,  0,
+			 0,  0, -1,  0,
+			 0,  0,  0,  1
+	};
+
 	private AirflowController controller;
 	private ButtonTimer buttonTimer = new ButtonTimer();
 	
@@ -178,6 +214,23 @@ public class AirflowSettingsPane extends JTabbedPane {
 			controller.moveViewMatrix(moveDelta, moveSpeed);
 		}
 	}
+
+	class ViewResetButton extends JButton implements ActionListener {
+
+		private double[] resetMatrix;
+		
+		public ViewResetButton(String text, double[] matrix) {
+			super(text);
+			resetMatrix = matrix;
+			addActionListener(this);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			log.info("ViewReset "+getText());
+			controller.resetViewMatrix(resetMatrix);
+		}
+	}
 	
 	public AirflowSettingsPane(AirflowController controllerIn)
 	{
@@ -240,19 +293,19 @@ public class AirflowSettingsPane extends JTabbedPane {
 		c.gridwidth = 3;
 		c.gridx = 0;
 		c.gridy = 4;
-		panel.add(new JButton("Reset X+", icon), c);
+		panel.add(new ViewResetButton("Reset X+", RESET_XP), c);
 		c.gridy = 5;
-		panel.add(new JButton("Reset X-", icon), c);
+		panel.add(new ViewResetButton("Reset X-", RESET_XN), c);
 		c.gridx = 3;
 		c.gridy = 4;
-		panel.add(new JButton("Reset Y+", icon), c);
+		panel.add(new ViewResetButton("Reset Y+", RESET_YP), c);
 		c.gridy = 5;
-		panel.add(new JButton("Reset Y-", icon), c);
+		panel.add(new ViewResetButton("Reset Y-", RESET_YN), c);
 		c.gridx = 6;
 		c.gridy = 4;
-		panel.add(new JButton("Reset Z+", icon), c);
+		panel.add(new ViewResetButton("Reset Z+", RESET_ZP), c);
 		c.gridy = 5;
-		panel.add(new JButton("Reset Z-", icon), c);
+		panel.add(new ViewResetButton("Reset Z-", RESET_ZN), c);
 
 		panel = new JPanel();
 		addTab("Data Display", panel);

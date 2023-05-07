@@ -24,6 +24,8 @@ import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 
+import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
+
 public class AirflowPanel extends JPanel implements GLEventListener, MouseInputListener, MouseWheelListener, AirflowController.ControllerEventHandler {
 
 	private static final long serialVersionUID = 1L;
@@ -303,26 +305,29 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		gl.glBegin(GL.GL_TRIANGLES);
 		gl.glColor3f(1,1,1);  // Color should be white for textures to work
 		
+		Vector3D c = controller.settings.cutPlaneCenter;
+		Vector3D u = controller.settings.cutPlaneU;
+		Vector3D v = controller.settings.cutPlaneV;
 		// +X is right
 		// +Y is up
 		// -Z is forward
 		gl.glTexCoord2f(0, 0);
-		gl.glVertex3f(5, 0, 0);
+		gl.glVertex3f(c.x - u.x - v.x, c.y - u.y - v.y, c.z - u.z - v.z);
 		
 		gl.glTexCoord2f(1, 1);
-		gl.glVertex3f(5, 10, 10);
+		gl.glVertex3f(c.x + u.x + v.x, c.y + u.y + v.y, c.z + u.z + v.z);
 		
 		gl.glTexCoord2f(1, 0);
-		gl.glVertex3f(5, 10, 0);
+		gl.glVertex3f(c.x + u.x - v.x, c.y + u.y - v.y, c.z + u.z - v.z);
 		
 		gl.glTexCoord2f(0, 0);
-		gl.glVertex3f(5, 0, 0);
+		gl.glVertex3f(c.x - u.x - v.x, c.y - u.y - v.y, c.z - u.z - v.z);
 		
 		gl.glTexCoord2f(0, 1);
-		gl.glVertex3f(5, 0, 10);
+		gl.glVertex3f(c.x - u.x + v.x, c.y - u.y + v.y, c.z - u.z + v.z);
 		
 		gl.glTexCoord2f(1, 1);
-		gl.glVertex3f(5, 10, 10);
+		gl.glVertex3f(c.x + u.x + v.x, c.y + u.y + v.y, c.z + u.z + v.z);
 		
 		gl.glEnd();
 		
