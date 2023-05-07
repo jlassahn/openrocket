@@ -24,6 +24,7 @@ import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 
+import jdk.internal.net.http.frame.SettingsFrame;
 import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
 
 public class AirflowPanel extends JPanel implements GLEventListener, MouseInputListener, MouseWheelListener, AirflowController.ControllerEventHandler {
@@ -308,26 +309,27 @@ public class AirflowPanel extends JPanel implements GLEventListener, MouseInputL
 		Vector3D c = controller.settings.cutPlaneCenter;
 		Vector3D u = controller.settings.cutPlaneU;
 		Vector3D v = controller.settings.cutPlaneV;
+		float s = (float)controller.settings.cutPlaneSize;
 		// +X is right
 		// +Y is up
 		// -Z is forward
 		gl.glTexCoord2f(0, 0);
-		gl.glVertex3f(c.x - u.x - v.x, c.y - u.y - v.y, c.z - u.z - v.z);
+		gl.glVertex3f(c.x - u.x*s - v.x*s, c.y - u.y*s - v.y*s, c.z - u.z*s - v.z*s);
 		
 		gl.glTexCoord2f(1, 1);
-		gl.glVertex3f(c.x + u.x + v.x, c.y + u.y + v.y, c.z + u.z + v.z);
+		gl.glVertex3f(c.x + u.x*s + v.x*s, c.y + u.y*s + v.y*s, c.z + u.z*s + v.z*s);
 		
 		gl.glTexCoord2f(1, 0);
-		gl.glVertex3f(c.x + u.x - v.x, c.y + u.y - v.y, c.z + u.z - v.z);
+		gl.glVertex3f(c.x + u.x*s - v.x*s, c.y + u.y*s - v.y*s, c.z + u.z*s - v.z*s);
 		
 		gl.glTexCoord2f(0, 0);
-		gl.glVertex3f(c.x - u.x - v.x, c.y - u.y - v.y, c.z - u.z - v.z);
+		gl.glVertex3f(c.x - u.x*s - v.x*s, c.y - u.y*s - v.y*s, c.z - u.z*s - v.z*s);
 		
 		gl.glTexCoord2f(0, 1);
-		gl.glVertex3f(c.x - u.x + v.x, c.y - u.y + v.y, c.z - u.z + v.z);
+		gl.glVertex3f(c.x - u.x*s + v.x*s, c.y - u.y*s + v.y*s, c.z - u.z*s + v.z*s);
 		
 		gl.glTexCoord2f(1, 1);
-		gl.glVertex3f(c.x + u.x + v.x, c.y + u.y + v.y, c.z + u.z + v.z);
+		gl.glVertex3f(c.x + u.x*s + v.x*s, c.y + u.y*s + v.y*s, c.z + u.z*s + v.z*s);
 		
 		gl.glEnd();
 		

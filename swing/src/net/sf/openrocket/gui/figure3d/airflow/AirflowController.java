@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.openrocket.aerodynamics.panelmethod.PanelSolver;
+import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
 
 public class AirflowController {
 	private static final Logger log = LoggerFactory.getLogger(AirflowPanel.class);
@@ -97,5 +98,33 @@ public class AirflowController {
 		settings.viewMatrix.matrix[14] = -settings.defaultDistance;
 		notifyRedraw();
 	}
+	
+	public void setCutPlaneSize(double size) {
+		log.info("setCutPlaneSize");
+		settings.cutPlaneSize = size;
+		notifyRefetch();
+	}
 
+	public void setCutPlaneX(double x) {
+		log.info("setCutPlaneX");
+		settings.cutPlaneCenter.x = (float)x;
+		notifyRefetch();
+	}
+	public void setCutPlaneY(double x) {
+		log.info("setCutPlaneY");
+		settings.cutPlaneCenter.y = (float)x;
+		notifyRefetch();
+	}
+	public void setCutPlaneZ(double x) {
+		log.info("setCutPlaneZ");
+		settings.cutPlaneCenter.z = (float)x;
+		notifyRefetch();
+	}
+
+	public void setCutPlaneAngle(Vector3D u, Vector3D v) {
+		log.info("setCutPlaneAngle");
+		settings.cutPlaneU = u;
+		settings.cutPlaneV = v;
+		notifyRefetch();
+	}
 }

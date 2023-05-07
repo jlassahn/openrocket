@@ -16,7 +16,8 @@ public class AirflowSettings {
 		0, 0,-100, 1
 	});
 	public double defaultDistance = 100;
+	public double cutPlaneSize = 10.0;
 	public Vector3D cutPlaneCenter = new Vector3D(0.0f, 0.0f, 0.0f);
-	public Vector3D cutPlaneU = new Vector3D(10.0f, 0.0f, 0.0f);
-	public Vector3D cutPlaneV = new Vector3D(0.0f, 10.0f, 0.0f);
+	public Vector3D cutPlaneU = new Vector3D(1.0f, 0.0f, 0.0f);
+	public Vector3D cutPlaneV = new Vector3D(0.0f, 1.0f, 0.0f);
 }

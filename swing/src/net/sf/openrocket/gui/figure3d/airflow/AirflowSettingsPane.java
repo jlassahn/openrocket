@@ -18,8 +18,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
+
+import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
 
 
 public class AirflowSettingsPane extends JTabbedPane {
@@ -232,6 +236,84 @@ public class AirflowSettingsPane extends JTabbedPane {
 		}
 	}
 	
+	class NumberChooser extends JSpinner implements ChangeListener {
+
+		private CallDouble handleChange;
+		
+		public NumberChooser(double initial, double min, double max, double step, CallDouble handler) {
+			super(new SpinnerNumberModel(initial, min, max, step));
+			((JSpinner.DefaultEditor)getEditor()).getTextField().setColumns(8);
+			handleChange = handler;
+			addChangeListener(this);
+		}
+		
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			double val = ((SpinnerNumberModel)getModel()).getNumber().doubleValue();
+			log.info("Number Selected "+val);
+			handleChange.call(val);
+		}
+	}
+	
+	abstract class CallDouble {
+		public abstract void call(double n);
+	}
+	
+	class SetCutPlaneSize extends CallDouble {
+		public void call(double x) {
+			controller.setCutPlaneSize(x);
+		}
+	}
+
+	class SetCutPlaneX extends CallDouble {
+		public void call(double x) {
+			controller.setCutPlaneX(x);
+		}
+	}
+
+	class SetCutPlaneY extends CallDouble {
+		public void call(double x) {
+			controller.setCutPlaneY(x);
+		}
+	}
+
+	class SetCutPlaneZ extends CallDouble {
+		public void call(double x) {
+			controller.setCutPlaneZ(x);
+		}
+	}
+
+
+	class CutPlaneAngleChooser extends JComboBox<String> implements ActionListener {
+
+		public CutPlaneAngleChooser() {
+			super(new String[] {
+					"XY",
+					"YZ",
+					"XZ"
+				});
+			addActionListener(this);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int n = this.getSelectedIndex();
+			log.info("CutPlaneAngleChooser " + n);
+			switch (n) {
+			case 0:
+				controller.setCutPlaneAngle(new Vector3D(1,0,0), new Vector3D(0,1,0));
+				break;
+			case 1:
+				controller.setCutPlaneAngle(new Vector3D(0,1,0), new Vector3D(0,0,1));
+				break;
+			case 2:
+				controller.setCutPlaneAngle(new Vector3D(1,0,0), new Vector3D(0,0,1));
+				break;
+			}
+		}
+		
+	}
+
 	public AirflowSettingsPane(AirflowController controllerIn)
 	{
 		controller = controllerIn;
@@ -307,9 +389,14 @@ public class AirflowSettingsPane extends JTabbedPane {
 		c.gridy = 5;
 		panel.add(new ViewResetButton("Reset Z-", RESET_ZN), c);
 
-		panel = new JPanel();
+		panel = new JPanel(new GridBagLayout());
 		addTab("Data Display", panel);
 
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.gridx = 0;
+		c.gridy = 0;
+		panel.add(new JLabel("Surface View: "), c);
 		String[] surfaceList = {
 			"Wireframe",
 			"Abs Velocity",
@@ -320,7 +407,8 @@ public class AirflowSettingsPane extends JTabbedPane {
 			"Pressure Coefficient",
 			"Doublet Strength"
 		};
-		panel.add(new JComboBox<String>(surfaceList));
+		c.gridx = 1;
+		panel.add(new JComboBox<String>(surfaceList), c);
 
 		String[] volumeList = {
 			"Abs Velocity",
@@ -334,15 +422,42 @@ public class AirflowSettingsPane extends JTabbedPane {
 			"Z Curl V",
 			"Div V"
 		};
-		panel.add(new JComboBox<String>(volumeList));
+		c.gridx = 0;
+		c.gridy = 1;
+		panel.add(new JLabel("Volume View: "), c);
+		c.gridx = 1;
+		panel.add(new JComboBox<String>(volumeList), c);
 
-		String[] planeList = {
-			"XY",
-			"YZ",
-			"XZ"
-		};
-		panel.add(new JComboBox<String>(planeList));
+		c.gridx = 0;
+		c.gridy = 2;
+		panel.add(new JLabel("Cut Plane Angle: "), c);
+		c.gridx = 1;
+		panel.add(new CutPlaneAngleChooser(), c);
 
+		c.gridx = 0;
+		c.gridy = 3;
+		panel.add(new JLabel("Cut Plane Size: "), c);
+		c.gridx = 1;
+		panel.add(new NumberChooser(10, 1, Double.POSITIVE_INFINITY, 1, new SetCutPlaneSize()), c);
+		
+		c.gridx = 0;
+		c.gridy = 4;
+		panel.add(new JLabel("Cut Plane X: "), c);
+		c.gridx = 1;
+		panel.add(new NumberChooser(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1, new SetCutPlaneX()), c);
+		
+		c.gridx = 0;
+		c.gridy = 5;
+		panel.add(new JLabel("Cut Plane Y: "), c);
+		c.gridx = 1;
+		panel.add(new NumberChooser(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1, new SetCutPlaneY()), c);
+		
+		c.gridx = 0;
+		c.gridy = 6;
+		panel.add(new JLabel("Cut Plane Z: "), c);
+		c.gridx = 1;
+		panel.add(new NumberChooser(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 1, new SetCutPlaneZ()), c);
+		
 		// enable cut plane
 		// make plane semitransparent
 		// size and position of cut plane
