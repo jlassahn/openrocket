@@ -15,6 +15,11 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 
 	private AirflowController controller;
 
+	private static final int CUT_PLANE_SIZE = 512;
+	private boolean cutPlaneBufferValid = false;
+	private byte[] cutPlaneArray = new byte[CUT_PLANE_SIZE*CUT_PLANE_SIZE*4];
+	private ByteBuffer cutPlaneBuffer = ByteBuffer.wrap(cutPlaneArray);
+
 	public AirflowView(AirflowController controllerIn) {
 		log.info("AirflowView constructor");
 		controller = controllerIn;
@@ -25,6 +30,7 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 	@Override
 	public void onControllerChange() {
 		log.info("controller refetch");
+		cutPlaneBufferValid = false;
 	}
 
 	
@@ -161,7 +167,7 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		
 		ByteBuffer buf = getCutPlaneBytes();
-		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, 16, 16, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, buf);
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, CUT_PLANE_SIZE, CUT_PLANE_SIZE, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, buf);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
 		
@@ -199,18 +205,37 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 	}
 	
 	private ByteBuffer getCutPlaneBytes() {
-
-		byte[] picture = new byte[16*16*4];
-		for (int x=0; x<16; x++)
-			for (int y=0; y<16; y++)
+		if (cutPlaneBufferValid)
+			return cutPlaneBuffer;
+		
+		Vector3D point = new Vector3D();
+		Vector3D u = controller.settings.cutPlaneU;
+		Vector3D v = controller.settings.cutPlaneV;
+		Vector3D c = controller.settings.cutPlaneCenter;
+		float s = (float)(controller.settings.cutPlaneSize*(2.0/CUT_PLANE_SIZE));
+		float offset = s*(CUT_PLANE_SIZE/2) + (float)(controller.settings.cutPlaneSize*(1.0/CUT_PLANE_SIZE));
+		
+		for (int ui=0; ui<CUT_PLANE_SIZE; ui++)
+			for (int vi=0; vi<CUT_PLANE_SIZE; vi++)
 			{
-				picture[0 + 4*x + 4*16*y] = (byte)((y&1)*255);  // Red
-				picture[1 + 4*x + 4*16*y] = (byte)0;  // Green
-				picture[2 + 4*x + 4*16*y] = (byte)((x&1)*255);  // Blue
-				picture[3 + 4*x + 4*16*y] = (byte)0;
+				float du = ui*s - offset;
+				float dv = vi*s - offset;
+				float x = du*u.x + dv*v.x + c.x;
+				float y = du*u.y + dv*v.y + c.y;
+				float z = du*u.z + dv*v.z + c.z;
+				
+				float val = 100.0f - x*x - y*y - z*z;
+				byte b = 0;
+				if (val > 0)
+					b = (byte)(val*2.55);
+					
+				cutPlaneArray[0 + 4*ui + 4*CUT_PLANE_SIZE*vi] = b;  // Red
+				cutPlaneArray[1 + 4*ui + 4*CUT_PLANE_SIZE*vi] = (byte)30;  // Green
+				cutPlaneArray[2 + 4*ui + 4*CUT_PLANE_SIZE*vi] = b;  // Blue
+				cutPlaneArray[3 + 4*ui + 4*CUT_PLANE_SIZE*vi] = (byte)0;
 			}
-		ByteBuffer buf = ByteBuffer.wrap(picture);
-		return buf;
+		cutPlaneBufferValid = true;
+		return cutPlaneBuffer;
 	}
 
 }
