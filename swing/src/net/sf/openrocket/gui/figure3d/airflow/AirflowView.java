@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
+import net.sf.openrocket.aerodynamics.panelmethod.PanelSolver;
+import net.sf.openrocket.aerodynamics.panelmethod.PointStatistics;
 import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
 
 public class AirflowView implements AirflowController.ControllerEventHandler {
@@ -209,6 +211,10 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 			return cutPlaneBuffer;
 		
 		Vector3D point = new Vector3D();
+		PointStatistics stats = new PointStatistics();
+		PanelSolver solver = controller.solver;
+		byte[] color = new byte[4];
+		
 		Vector3D u = controller.settings.cutPlaneU;
 		Vector3D v = controller.settings.cutPlaneV;
 		Vector3D c = controller.settings.cutPlaneCenter;
@@ -223,16 +229,20 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 				float x = du*u.x + dv*v.x + c.x;
 				float y = du*u.y + dv*v.y + c.y;
 				float z = du*u.z + dv*v.z + c.z;
+
+				point.x = x;
+				point.y = y;
+				point.z = z;
 				
-				float val = 100.0f - x*x - y*y - z*z;
-				byte b = 0;
-				if (val > 0)
-					b = (byte)(val*2.55);
-					
-				cutPlaneArray[0 + 4*ui + 4*CUT_PLANE_SIZE*vi] = b;  // Red
-				cutPlaneArray[1 + 4*ui + 4*CUT_PLANE_SIZE*vi] = (byte)30;  // Green
-				cutPlaneArray[2 + 4*ui + 4*CUT_PLANE_SIZE*vi] = b;  // Blue
-				cutPlaneArray[3 + 4*ui + 4*CUT_PLANE_SIZE*vi] = (byte)0;
+				solver.getPointStatistics(point, stats);
+
+				//float val = (100.0f - x*x - y*y - z*z)/100;
+				float val = stats.v.x*16.0f/16.0f;
+				NumberToColor.RED_GREEN.compute(val, color);
+				cutPlaneArray[0 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[0];
+				cutPlaneArray[1 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[1];
+				cutPlaneArray[2 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[2];
+				cutPlaneArray[3 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[3];
 			}
 		cutPlaneBufferValid = true;
 		return cutPlaneBuffer;
