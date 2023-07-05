@@ -9,5 +9,11 @@ public class PointStatistics {
 	{
 		v = new Vector3D();
 	}
+	
+	public void clear() {
+		v.x = 0;
+		v.y = 0;
+		v.z = 0;
+	}
 }
 

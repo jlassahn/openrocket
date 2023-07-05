@@ -1,6 +1,7 @@
 package net.sf.openrocket.gui.figure3d.airflow;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 import net.sf.openrocket.aerodynamics.panelmethod.PanelSolver;
+import net.sf.openrocket.aerodynamics.panelmethod.PanelTriangle;
 import net.sf.openrocket.aerodynamics.panelmethod.PointStatistics;
 import net.sf.openrocket.aerodynamics.panelmethod.Vector3D;
 
@@ -49,6 +51,21 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 	private void drawLines(GL2 gl) {
 		gl.glBegin(GL.GL_LINES);
 
+		gl.glColor3f(1, 1, 1);
+
+		Collection<PanelTriangle> panels = controller.solver.getPanels();
+		for (PanelTriangle panel : panels)
+		{
+			gl.glVertex3f(panel.p0.x, panel.p0.y, panel.p0.z);
+			gl.glVertex3f(panel.p1.x, panel.p1.y, panel.p1.z);
+			
+			gl.glVertex3f(panel.p1.x, panel.p1.y, panel.p1.z);
+			gl.glVertex3f(panel.p2.x, panel.p2.y, panel.p2.z);
+			
+			gl.glVertex3f(panel.p2.x, panel.p2.y, panel.p2.z);
+			gl.glVertex3f(panel.p0.x, panel.p0.y, panel.p0.z);
+		}
+		
 		gl.glColor3f(1, 1, 1);
 		gl.glVertex3f(0, 0, 0);
 		gl.glVertex3f(1, 0, 0);
@@ -236,8 +253,7 @@ public class AirflowView implements AirflowController.ControllerEventHandler {
 				
 				solver.getPointStatistics(point, stats);
 
-				//float val = (100.0f - x*x - y*y - z*z)/100;
-				float val = stats.v.x*16.0f/16.0f;
+				float val = stats.v.z*16.0f/16.0f;
 				NumberToColor.RED_GREEN.compute(val, color);
 				cutPlaneArray[0 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[0];
 				cutPlaneArray[1 + 4*ui + 4*CUT_PLANE_SIZE*vi] = color[1];
